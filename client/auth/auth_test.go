@@ -22,3 +22,11 @@ func TestAuthJSON(t *testing.T) {
 		t.Error(fmt.Errorf("Serializes incorrectly"))
 	}
 }
+
+// TODO: fill in login method testing
+
+func TestDummyPasswordLogin(*testing.T) {}
+
+func TestDummyCaptchaLogin(*testing.T) {}
+
+func TestDummyOAuth2Login(*testing.T) {}

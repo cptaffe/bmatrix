@@ -1,5 +1,7 @@
 package errors
 
+import "fmt"
+
 // Errorer exposes an interface for Matrix Errors
 // allowing them to be returned as normal errors
 type Errorer interface {
@@ -27,6 +29,10 @@ const (
 	BadPagination      = "M_BAD_PAGINATION"
 	WeakPassword       = "M_WEAK_PASSWORD"
 )
+
+func (e *Error) Error() string {
+	return fmt.Sprintf("%s: %s", e.Code, e.Reason)
+}
 
 // New ErrError Errorer from Code and error
 func New(c Code, e error) *Error {
