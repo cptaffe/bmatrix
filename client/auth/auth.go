@@ -2,10 +2,10 @@ package auth
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"log"
 
-	merrors "../errors"
+	"github.com/cptaffe/bmatrix/client/errors"
 )
 
 // Stage represents the Matrix login type
@@ -29,11 +29,23 @@ type Flow struct {
 // for a login type
 type Params map[string]interface{}
 
+// Handler interface exposes the HandleAuth function
+type Handler interface {
+	// HandleAuth takes an auth request and returns a bool
+	// or an error
+	HandleAuth(auth map[string]interface{}) (bool, error)
+}
+
 // Auth represents Matrix login flows
 type Auth struct {
-	Flows   []Flow           `json:"flows"`
-	Params  map[Stage]Params `json:"params"`
-	Session []byte           `json:"session"`
+	Flows    []Flow           `json:"flows"`
+	Params   map[Stage]Params `json:"params"`
+	Session  []byte           `json:"session"`
+	handlers map[Stage]Handler
+}
+
+func (a *Auth) RegisterHandler(s Stage, h Handler) {
+	a.handlers[s] = h
 }
 
 // Successful is the response given a successful auth
@@ -45,20 +57,14 @@ type Successful struct {
 	Session   []byte           `json:"session"`
 }
 
-// Handler interface exposes the HandleAuth function
-type Handler interface {
-	// HandleAuth takes an auth request and returns a bool
-	// or an error
-	HandleAuth(auth map[string]interface{}) (bool, error)
-}
-
 // Request represents the inner 'auth' key structure
 // in a Matrix-compliant Auth request resubmittal of the original
 // query
 type Request struct {
 	Stage   Stage
 	Session string
-	// Map is dependent on the type of authentication
+	// Map is dependent on the type of authentication,
+	// e.g. for password it would have the keys
 	Auth map[string]interface{}
 }
 
@@ -83,14 +89,14 @@ func (a *Request) UnmarshalJSON(b []byte) error {
 	log.Println(string(b))
 	m := map[string]interface{}{}
 	if err := json.Unmarshal(b, &m); err != nil {
-		return merrors.New(merrors.BadJSON, err)
+		return errors.New(errors.BadJSON, err)
 	}
 	if m["type"] == nil {
-		return merrors.New(merrors.BadJSON, errors.New("Missing 'type' key in auth request auth section"))
+		return errors.New(errors.BadJSON, fmt.Errorf("Missing 'type' key in auth request auth section"))
 	}
 	a.Stage = m["type"].(Stage)
 	if m["session"] == nil {
-		return merrors.New(merrors.BadJSON, errors.New("Missing 'session' key in auth request auth section"))
+		return errors.New(errors.BadJSON, fmt.Errorf("Missing 'session' key in auth request auth section"))
 	}
 	a.Session = m["session"].(string)
 	delete(m, "type")

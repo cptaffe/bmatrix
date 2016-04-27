@@ -2,7 +2,7 @@ package auth
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -19,6 +19,6 @@ func TestAuthJSON(t *testing.T) {
 	}
 	t.Log(string(buf))
 	if string(buf) != string(b) {
-		t.Error(errors.New("Serializes incorrectly"))
+		t.Error(fmt.Errorf("Serializes incorrectly"))
 	}
 }
