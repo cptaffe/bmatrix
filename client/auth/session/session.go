@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 )
 
+// Size specifies the Token size in bytes
+const Size = 64
+
 var encoding = base64.URLEncoding
 
 // Session stores the user's session token
 type Session struct {
-	Token []byte
+	Token [Size]byte
 }
 
 // New creates a new Session with a random token
@@ -20,14 +23,16 @@ func New() (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Session{
-		Token: b,
-	}, nil
+	s := &Session{}
+	copy(s.Token[:], b[:Size])
+	return s, nil
 }
 
 // MarshalJSON returns a URL-safe base64'd string encoded to JSON
 func (s *Session) MarshalJSON() ([]byte, error) {
-	return json.Marshal(encoding.EncodeToString(s.Token))
+	b := make([]byte, Size)
+	copy(b, s.Token[:])
+	return json.Marshal(encoding.EncodeToString(b))
 }
 
 // UnmarshalJSON decodes from a JSON encoded URL-safe base64 string
@@ -40,6 +45,6 @@ func (s *Session) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	s.Token = b
+	copy(s.Token[:], b)
 	return nil
 }
