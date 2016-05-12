@@ -104,9 +104,7 @@ func (a *Reply) UnmarshalJSON(b []byte) error {
 	if m["session"] == nil {
 		return errors.New(errors.BadJSON, fmt.Errorf("Missing 'session' key in auth request auth section"))
 	}
-	a.Session = &session.Session{
-		Token: m["session"].(string),
-	}
+	a.Session = m["session"].(*session.Session)
 	delete(m, "type")
 	delete(m, "session")
 	a.Auth = m

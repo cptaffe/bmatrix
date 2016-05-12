@@ -8,7 +8,15 @@ import (
 )
 
 func TestAuthJSON(t *testing.T) {
-	b := []byte(`{"flows":[{"stages":["example.type.foo","example.type.bar"]},{"stages":["example.type.foo","example.type.baz"]}],"params":{"example.type.baz":{"example_key":"foobar"}},"session":"xxxxxx"}`)
+	s, err := session.New()
+	if err != nil {
+		t.Error(err)
+	}
+	sb, err := json.Marshal(s)
+	if err != nil {
+		t.Error(err)
+	}
+	b := []byte(`{"flows":[{"stages":["example.type.foo","example.type.bar"]},{"stages":["example.type.foo","example.type.baz"]}],"params":{"example.type.baz":{"example_key":"foobar"}},"session":` + string(sb) + `}`)
 	a := Resp{}
 	if err := json.Unmarshal(b, &a); err != nil {
 		t.Error(err)
