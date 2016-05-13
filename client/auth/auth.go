@@ -13,12 +13,12 @@ import (
 type Stage string
 
 const (
-	PasswordStage  Stage = "m.login.password"
-	RecaptchaStage       = "m.login.recaptcha"
-	Oauth2Stage          = "m.login.oauth2"
-	IdentityStage        = "m.login.email.identity"
-	TokenStage           = "m.login.token"
-	DummyStage           = "m.login.dummy"
+	PasswordStage      Stage = "m.login.password"
+	RecaptchaStage           = "m.login.recaptcha"
+	Oauth2Stage              = "m.login.oauth2"
+	EmailIdentityStage       = "m.login.email.identity"
+	TokenStage               = "m.login.token"
+	DummyStage               = "m.login.dummy"
 )
 
 // Handler interface exposes the HandleAuth function

@@ -18,20 +18,18 @@ type Session struct {
 
 // New creates a new Session with a random token
 func New() (*Session, error) {
-	b := make([]byte, 64)
-	_, err := rand.Read(b)
+	s := &Session{}
+	_, err := rand.Read(s.Token[:len(s.Token)])
 	if err != nil {
 		return nil, err
 	}
-	s := &Session{}
-	copy(s.Token[:], b[:Size])
 	return s, nil
 }
 
 // MarshalJSON returns a URL-safe base64'd string encoded to JSON
 func (s *Session) MarshalJSON() ([]byte, error) {
 	b := make([]byte, Size)
-	copy(b, s.Token[:])
+	copy(b, s.Token[:len(s.Token)])
 	return json.Marshal(encoding.EncodeToString(b))
 }
 
@@ -45,6 +43,6 @@ func (s *Session) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	copy(s.Token[:], b)
+	copy(s.Token[:len(s.Token)], b)
 	return nil
 }

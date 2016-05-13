@@ -20,6 +20,7 @@ type Error struct {
 const (
 	Forbidden     Code = "M_FORBIDDEN"
 	UnknownToken       = "M_UNKNOWN_TOKEN"
+	MissingToken       = "M_MISSING_TOKEN"
 	BadJSON            = "M_BAD_JSON"
 	NotJSON            = "M_NOT_JSON"
 	NotFound           = "M_NOT_FOUND"
