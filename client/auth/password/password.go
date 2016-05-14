@@ -29,17 +29,17 @@ func (p Password) Entropy() float64 {
 // Handler implements auth.Handler
 type Handler struct {
 	AuthUser AuthUser
-	Auth3PID Auth3PID
+	AuthTPID AuthTPID
 }
 
 // AuthUser authenticates a user reply
 type AuthUser interface {
-	AuthenticateUser(*ReplyUser) (bool, error)
+	AuthenticateUser(*UserReply) (bool, error)
 }
 
-// Auth3PID authenticates a 3pid reply
-type Auth3PID interface {
-	Authenticate3PID(*Reply3PID) (bool, error)
+// AuthTPID authenticates a 3pid reply
+type AuthTPID interface {
+	AuthenticateTPID(*TPIDReply) (bool, error)
 }
 
 // HandleAuth handles parsing the authentication information into the
@@ -52,7 +52,7 @@ func (h *Handler) HandleAuth(a map[string]interface{}) (bool, error) {
 	}
 	if a["user"] != nil {
 		// ReplyUser style reply
-		rp := &ReplyUser{}
+		rp := &UserReply{}
 		if err := json.Unmarshal(b, rp); err != nil {
 			return false, errors.New(errors.BadJSON, err)
 		}
@@ -63,12 +63,12 @@ func (h *Handler) HandleAuth(a map[string]interface{}) (bool, error) {
 	} else if a["medium"] != nil {
 		// medium must equal 'email'
 		// Reply3PID style reply
-		rp := &Reply3PID{}
+		rp := &TPIDReply{}
 		if err := json.Unmarshal(b, rp); err != nil {
 			return false, errors.New(errors.BadJSON, err)
 		}
-		if h.Auth3PID != nil {
-			return rp.Authenticate(h.Auth3PID)
+		if h.AuthTPID != nil {
+			return rp.Authenticate(h.AuthTPID)
 		}
 		return false, nil
 	}
@@ -82,15 +82,15 @@ func testPasswordEntropy(p Password) error {
 	return nil
 }
 
-// ReplyUser is the Auth reply
-type ReplyUser struct {
+// UserReply is the Auth reply
+type UserReply struct {
 	Type     auth.Stage `json:"type"` // must be auth.PasswordStage
 	User     string     `json:"user"`
 	Password Password   `json:"password"`
 }
 
 // Authenticate authenticates a user
-func (r *ReplyUser) Authenticate(auth AuthUser) (bool, error) {
+func (r *UserReply) Authenticate(auth AuthUser) (bool, error) {
 	if err := testPasswordEntropy(r.Password); err != nil {
 		return false, err
 	}
@@ -108,8 +108,8 @@ const (
 
 // TODO: UnmarshalJSON check that it equals EmailMedium
 
-// Reply3PID is 3rd party identification
-type Reply3PID struct {
+// TPIDReply is 3rd party identification
+type TPIDReply struct {
 	Type     auth.Stage `json:"type"`
 	Medium   Medium     `json:"medium"` // "has to be 'email'"
 	Address  string     `json:"address"`
@@ -117,7 +117,7 @@ type Reply3PID struct {
 }
 
 // Authenticate authenticates a user via 3pid
-func (r *Reply3PID) Authenticate(auth Auth3PID) (bool, error) {
+func (r *TPIDReply) Authenticate(auth AuthTPID) (bool, error) {
 	// sanity check because we don't have special checks in parsing
 	if r.Medium != EmailMedium {
 		return false, errors.New(errors.UnknownToken, fmt.Errorf("3pid requests must have 'medium' as 'email'; see §3.1.2.1"))
@@ -126,5 +126,5 @@ func (r *Reply3PID) Authenticate(auth Auth3PID) (bool, error) {
 		return false, err
 	}
 	// TODO: authenticate with credentials
-	return auth.Authenticate3PID(r)
+	return auth.AuthenticateTPID(r)
 }

@@ -16,11 +16,11 @@ type testAuther struct {
 	Pass string
 }
 
-func (t *testAuther) Authenticate3PID(r *Reply3PID) (bool, error) {
+func (t *testAuther) AuthenticateTPID(r *TPIDReply) (bool, error) {
 	return string(r.Password) == t.Pass, nil
 }
 
-func (t *testAuther) AuthenticateUser(r *ReplyUser) (bool, error) {
+func (t *testAuther) AuthenticateUser(r *UserReply) (bool, error) {
 	return string(r.Password) == t.Pass, nil
 }
 
@@ -36,7 +36,7 @@ func TestHandleAuth(t *testing.T) {
 	}
 	ta := &testAuther{Pass: "abc"}
 	b, err := (&Handler{
-		Auth3PID: ta,
+		AuthTPID: ta,
 		AuthUser: ta,
 	}).HandleAuth(urm)
 	t.Log(err)
@@ -59,7 +59,7 @@ func TestHandleAuth3PID(t *testing.T) {
 	}
 	ta := &testAuther{Pass: "abc"}
 	b, err := (&Handler{
-		Auth3PID: ta,
+		AuthTPID: ta,
 		AuthUser: ta,
 	}).HandleAuth(urm)
 	t.Log(err)
